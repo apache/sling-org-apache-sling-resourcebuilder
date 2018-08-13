@@ -18,20 +18,18 @@
  */
 package org.apache.sling.resourcebuilder.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.resourcebuilder.api.ResourceBuilderFactory;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * ResourceBuilderFactory service.
  */
-@Component
-@Service(value=ResourceBuilderFactory.class)
+@Component(service = ResourceBuilderFactory.class)
 public class ResourceBuilderFactoryService implements ResourceBuilderFactory {
     
     @Reference

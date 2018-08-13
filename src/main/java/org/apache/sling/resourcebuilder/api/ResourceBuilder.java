@@ -22,8 +22,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
-
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /** Builds Sling Resources using a simple fluent API */
 @ProviderType

@@ -20,8 +20,7 @@ package org.apache.sling.resourcebuilder.api;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Factory service for building {@link ResourceBuilder} instances.
