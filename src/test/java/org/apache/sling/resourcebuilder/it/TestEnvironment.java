@@ -29,6 +29,7 @@ import org.apache.sling.junit.rules.TeleporterRule;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.resourcebuilder.api.ResourceBuilderFactory;
 
+@SuppressWarnings("null")
 class TestEnvironment {
     
     final ResourceBuilder builder;

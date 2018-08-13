@@ -20,6 +20,7 @@ package org.apache.sling.resourcebuilder.api;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -31,12 +32,12 @@ public interface ResourceBuilderFactory {
     /** Start a ResourceBuilder using the supplied parent resource 
      *  @return the new builder
      * */
-    ResourceBuilder forParent(Resource parent);
+    @NotNull ResourceBuilder forParent(@NotNull Resource parent);
     
     /** Start a ResourceBuilder using the supplied ResourceResolver,
      *  starting with the root resource as the builder's parent resource. 
      *  @return the new builder
      * */
-    ResourceBuilder forResolver(ResourceResolver r);
+    @NotNull ResourceBuilder forResolver(@NotNull ResourceResolver r);
     
 }

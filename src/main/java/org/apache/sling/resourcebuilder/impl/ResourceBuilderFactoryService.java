@@ -23,6 +23,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
 import org.apache.sling.resourcebuilder.api.ResourceBuilderFactory;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,13 +36,14 @@ public class ResourceBuilderFactoryService implements ResourceBuilderFactory {
     @Reference
     private MimeTypeService mimeTypeService;
     
+    @SuppressWarnings("null")
     @Override
-    public ResourceBuilder forParent(Resource parent) {
+    public @NotNull ResourceBuilder forParent(@NotNull Resource parent) {
         return new ResourceBuilderImpl(parent, mimeTypeService);
     }
 
     @Override
-    public ResourceBuilder forResolver(ResourceResolver r) {
+    public @NotNull ResourceBuilder forResolver(@NotNull ResourceResolver r) {
         final Resource root = r.getResource("/");
         if(root == null) {
             throw new IllegalStateException("Cannot read root resource");

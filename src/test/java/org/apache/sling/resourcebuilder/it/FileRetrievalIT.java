@@ -42,6 +42,7 @@ import org.junit.Test;
  *  by creating a file and retrieving it via
  *  a Sling request. 
  */
+@SuppressWarnings("null")
 public class FileRetrievalIT {
     
     @Rule

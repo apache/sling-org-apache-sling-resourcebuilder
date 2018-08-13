@@ -35,6 +35,7 @@ import org.junit.Test;
 /** Server-side integration test for the 
  *  ResourceBuilder, acquired via the ResourceBuilderProvider
  */
+@SuppressWarnings("null")
 public class ResourceBuilderIT {
     
     @Rule

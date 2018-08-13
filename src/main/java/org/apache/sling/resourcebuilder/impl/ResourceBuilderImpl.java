@@ -30,12 +30,15 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.mime.MimeTypeService;
 import org.apache.sling.resourcebuilder.api.ResourceBuilder;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** ResourceBuilder implementation */
+@SuppressWarnings("null")
 public class ResourceBuilderImpl implements ResourceBuilder {
-    private final Resource originalParent;
-    private final ResourceResolver resourceResolver;
-    private Resource currentParent;
+    private final @NotNull Resource originalParent;
+    private final @NotNull ResourceResolver resourceResolver;
+    private @NotNull Resource currentParent;
     private String intermediatePrimaryType;
     private boolean hierarchyMode;
     
@@ -51,11 +54,11 @@ public class ResourceBuilderImpl implements ResourceBuilder {
             "Cannot reset the parent resource or resource resolver, please create a new "
             + "builder using the ResourceBuilder service";
     
-    private final MimeTypeService mimeTypeService;
+    private final @NotNull MimeTypeService mimeTypeService;
     
-    public ResourceBuilderImpl(Resource parent, MimeTypeService mts) {
+    public ResourceBuilderImpl(@NotNull Resource parent, @NotNull MimeTypeService mts) {
         mimeTypeService = mts;
-        if(parent == null) {
+        if (parent == null) {
             throw new IllegalArgumentException("Parent resource is null");
         }
         originalParent = parent;
@@ -65,8 +68,8 @@ public class ResourceBuilderImpl implements ResourceBuilder {
         hierarchyMode = true;
     }
     
-    private ResourceBuilderImpl cloneResourceBuilder(Resource newCurrentParent,
-            String newIntermediatePrimaryType, boolean newHierarchyMode) {
+    private @NotNull ResourceBuilderImpl cloneResourceBuilder(@NotNull Resource newCurrentParent,
+            @Nullable String newIntermediatePrimaryType, boolean newHierarchyMode) {
         ResourceBuilderImpl clone = new ResourceBuilderImpl(originalParent, mimeTypeService);
         clone.currentParent = newCurrentParent;
         clone.intermediatePrimaryType = newIntermediatePrimaryType;
@@ -75,12 +78,12 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     }
     
     @Override
-    public Resource getCurrentParent() {
+    public @NotNull Resource getCurrentParent() {
         return currentParent;
     }
 
     @Override
-    public ResourceBuilder atParent() {
+    public @NotNull ResourceBuilder atParent() {
         return cloneResourceBuilder(originalParent, this.intermediatePrimaryType, true);
     }
     
@@ -107,7 +110,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     }
     
     @Override
-    public ResourceBuilder resource(String path, Map<String,Object> properties) {
+    public @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Map<String,Object> properties) {
         Resource r = null;
         
         final String parentPath;
@@ -132,7 +135,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
             } else {
                 // Resource exists, set our properties
                 final ModifiableValueMap mvm = r.adaptTo(ModifiableValueMap.class);
-                if(mvm == null) {
+                if (mvm == null) {
                     throw new IllegalStateException("Cannot modify properties of " + r.getPath());
                 }
                 for(Map.Entry <String, Object> e : properties.entrySet()) {
@@ -154,7 +157,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     
     @SuppressWarnings("unchecked")
     @Override
-    public ResourceBuilder resource(String path, Object... properties) {
+    public @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Object @NotNull ... properties) {
         if (properties == null || properties.length == 0) {
             return resource(path, ValueMap.EMPTY);
         }
@@ -209,7 +212,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     }
     
     @Override
-    public ResourceBuilder file(String relativePath, InputStream data, String mimeType, long lastModified) {
+    public @NotNull ResourceBuilder file(@NotNull String relativePath, @NotNull InputStream data, @Nullable String mimeType, long lastModified) {
         checkRelativePath(relativePath);
         final String name = ResourceUtil.getName(relativePath);
         if(data == null) {
@@ -250,28 +253,28 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     }
 
     @Override
-    public ResourceBuilder file(String filename, InputStream data) {
+    public @NotNull ResourceBuilder file(@NotNull String filename, @NotNull InputStream data) {
         return file(filename, data, null, -1);
     }
 
     @Override
-    public ResourceBuilder withIntermediatePrimaryType(String primaryType) {
+    public @NotNull ResourceBuilder withIntermediatePrimaryType(@Nullable String primaryType) {
         String intermediatePrimaryType = primaryType == null ? DEFAULT_PRIMARY_TYPE : primaryType;
         return cloneResourceBuilder(currentParent, intermediatePrimaryType, hierarchyMode);
     }
 
     @Override
-    public ResourceBuilder siblingsMode() {
+    public @NotNull ResourceBuilder siblingsMode() {
         return cloneResourceBuilder(currentParent, intermediatePrimaryType, false);
     }
 
     @Override
-    public ResourceBuilder hierarchyMode() {
+    public @NotNull ResourceBuilder hierarchyMode() {
         return cloneResourceBuilder(currentParent, intermediatePrimaryType, true);
     }
     
     @Override
-    public ResourceBuilder commit() {
+    public @NotNull ResourceBuilder commit() {
         try {
             resourceResolver.commit();
         } catch (PersistenceException ex) {

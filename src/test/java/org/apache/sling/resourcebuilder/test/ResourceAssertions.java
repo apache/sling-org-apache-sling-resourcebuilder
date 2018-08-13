@@ -37,6 +37,7 @@ import org.apache.sling.resourcebuilder.impl.MapArgsConverter;
 import org.apache.sling.resourcebuilder.impl.ResourceBuilderImpl;
 
 /** Utilities for asserting Resources and their properties */
+@SuppressWarnings("null")
 public class ResourceAssertions {
     
     private final ResourceResolver resourceResolver;

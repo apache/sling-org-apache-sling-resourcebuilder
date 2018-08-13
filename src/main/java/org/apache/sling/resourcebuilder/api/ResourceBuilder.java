@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.sling.api.resource.Resource;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 
 /** Builds Sling Resources using a simple fluent API */
@@ -35,21 +37,21 @@ public interface ResourceBuilder {
      *  parent Resource. 
      * @param path The path of the Resource to create.
      *    If it's a relative path this builder's current resource is used as parent.
-     *    Otherwise the resource is created ad the given absoulte path.
+     *    Otherwise the resource is created ad the given absolute path.
      * @param properties optional name-value pairs 
      * @return this builder
      */
-    ResourceBuilder resource(String path, Object... properties);
+    @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Object @NotNull ... properties);
 
     /** Create a Resource, which optionally becomes the current 
      *  parent Resource. 
      * @param path The path of the Resource to create.
      *    If it's a relative path this builder's current resource is used as parent.
-     *    Otherwise the resource is created ad the given absoulte path.
+     *    Otherwise the resource is created ad the given absolute path.
      * @param properties Name-value pairs 
      * @return this builder
      */
-    ResourceBuilder resource(String path, Map<String, Object> properties);
+    @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Map<String, Object> properties);
 
     /** Create a file under the current parent resource
      * @param filename The name of the created file
@@ -58,7 +60,7 @@ public interface ResourceBuilder {
      * @param lastModified if &lt; 0, current time is used
      * @return this builder
      */
-    ResourceBuilder file(String filename, InputStream data, String mimeType, long lastModified);
+    @NotNull ResourceBuilder file(@NotNull String filename, @NotNull InputStream data, @Nullable String mimeType, long lastModified);
     
     /** Create a file under the current parent resource. Mime type is set using the 
      *  Sling MimeTypeService, and last modified is set to current time.
@@ -66,37 +68,37 @@ public interface ResourceBuilder {
      * @param data The file data
      * @return this builder
      */
-    ResourceBuilder file(String filename, InputStream data);
+    @NotNull ResourceBuilder file(@NotNull String filename, @NotNull InputStream data);
     
     /** Commit created resources */
-    ResourceBuilder commit();
+    @NotNull ResourceBuilder commit();
     
     /** Set the primary type for intermediate resources created
      *  when the parent of resource being created does not exist.
      * @param primaryType If null the DEFAULT_PRIMARY_TYPE is used.
      * @return this builder
      */
-    ResourceBuilder withIntermediatePrimaryType(String primaryType);
+    @NotNull ResourceBuilder withIntermediatePrimaryType(@Nullable String primaryType);
     
     /** Set siblings mode (as opposed to hierarchy mode) where creating a resource 
      *  doesn't change the current parent. Used to create flat structures.
      *  This is off by default.
      * @return this builder
      */
-    ResourceBuilder siblingsMode();
+    @NotNull ResourceBuilder siblingsMode();
     
     /** Set hierarchy mode (as opposed to siblings mode) where creating a resource 
      *  sets it as the current parent. Used to create tree structures.
      *  This is on by default.
      * @return this builder
      */
-    ResourceBuilder hierarchyMode();
+    @NotNull ResourceBuilder hierarchyMode();
     
     /** Return the current parent resource */
-    Resource getCurrentParent();
+    @NotNull Resource getCurrentParent();
     
     /** Reset the current parent Resource to the original one.
      *  Also activates hierarchyMode which is the default mode. */ 
-    ResourceBuilder atParent();
+    @NotNull ResourceBuilder atParent();
 
 }

@@ -23,13 +23,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+
 /** Convert arguments which are a list of Object to a Map, used
  *  to simplify our builder's syntax.
  */
 public class MapArgsConverter {
     
     /** Convert an args list to a Map */
-    public static Map<String, Object> toMap(Object ... args) {
+    @SuppressWarnings("null")
+    public static @NotNull Map<String, Object> toMap(@NotNull Object @NotNull ... args) {
         if(args.length % 2 != 0) {
             throw new IllegalArgumentException("args must be an even number of name/values:" + Arrays.asList(args));
         }
