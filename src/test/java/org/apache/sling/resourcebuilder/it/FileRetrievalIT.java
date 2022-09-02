@@ -18,65 +18,69 @@
  */
 package org.apache.sling.resourcebuilder.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.servlet.ServletException;
-
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
-import org.apache.sling.junit.rules.TeleporterRule;
 import org.apache.sling.resourcebuilder.test.ResourceAssertions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.ops4j.pax.exam.CoreOptions.options;
 
 /** Verify that our file structure is correct,
  *  by creating a file and retrieving it via
  *  a Sling request. 
  */
-@SuppressWarnings("null")
-public class FileRetrievalIT {
-    
-    @Rule
-    public final TeleporterRule teleporter = 
-        TeleporterRule
-        .forClass(getClass(), "RBIT_Teleporter")
-        .withResources("/files/");
-    
-    private TestEnvironment E;
-    private ResourceAssertions A;
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerClass.class)
+public class FileRetrievalIT extends ResourceBuilderTestSupport {
+
+    private ResourceAssertions resourceAssertions;
 
     @Before
     public void setup() throws LoginException, PersistenceException {
-        E = new TestEnvironment(teleporter);
-        A = new ResourceAssertions(E.parent.getPath(), E.resolver);
+        initializeTestResources();
+        resourceAssertions = new ResourceAssertions(parent.getPath(), resolver());
     }
     
     @After
-    public void cleanup() throws PersistenceException {
-        E.cleanup();
+    public void cleanup() throws PersistenceException, LoginException {
+        cleanupTestResources();
+    }
+
+    @Configuration
+    public Option[] configuration() {
+        return options(
+                baseConfiguration()
+        );
     }
     
     @Test
-    public void createAndeRtrieveFile() throws IOException, ServletException {
+    public void createAndRetrieveFile() throws IOException {
         final String expected = "yes, it worked";
         final long startTime = System.currentTimeMillis();
         final String mimeType = "application/javascript";
         
-        E.builder
+        builder
             .resource("somefolder")
             .file("the-model.js", getClass().getResourceAsStream("/files/models.js"))
             .commit();
         
-        final Resource r = A.assertFile("somefolder/the-model.js", mimeType, expected, -1L);
+        final Resource r = resourceAssertions.assertFile("somefolder/the-model.js", mimeType, expected, -1L);
         
         final ResourceMetadata meta = r.getResourceMetadata();
         assertTrue("Expecting a last modified time >= startTime", meta.getModificationTime() >= startTime);
@@ -85,7 +89,7 @@ public class FileRetrievalIT {
         final InputStream is = r.adaptTo(InputStream.class);
         assertNotNull("Expecting InputStream for file resource " + r.getPath(), is);
         try {
-            final String content = A.readFully(is);
+            final String content = resourceAssertions.readFully(is);
             assertTrue("Expecting [" + expected + "] in content", content.contains(expected));
         } finally {
             is.close();

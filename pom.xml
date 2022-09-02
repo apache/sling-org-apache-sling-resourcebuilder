@@ -22,170 +22,59 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>34</version>
+        <artifactId>sling-bundle-parent</artifactId>
+        <version>49</version>
         <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.resourcebuilder</artifactId>
     <version>1.0.5-SNAPSHOT</version>
-    <packaging>bundle</packaging>
 
     <name>Apache Sling Resource Builder</name>
     <description>Utilities to create Sling content</description>
 
     <properties>
-        <!-- Set this to run the server on a specific port
-        <http.port></http.port>
-         -->
-         
-        <!-- Set this to run tests against an existing server instance -->
-        <keepJarRunning>false</keepJarRunning>
-        
-        <!-- 
-            Options for the VM that executes our runnable jar. 
-            Set debugging options here to debug teleported tests.  
-        -->
-        <jar.executor.vm.options>-Xmx512m</jar.executor.vm.options>
-        
-         <!-- Options for the jar to execute. $JAREXEC_SERVER_PORT$ is replaced by the
-            selected port number -->
-        <jar.executor.jar.options>-p $JAREXEC_SERVER_PORT$</jar.executor.jar.options>
+        <org.ops4j.pax.exam.version>4.13.4</org.ops4j.pax.exam.version>
     </properties>
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-resourcebuilder.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-resourcebuilder.git</developerConnection>
         <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-resourcebuilder.git</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>sling/**</exclude>
-                        <exclude>infinitest.filters</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <!-- Find free ports to run our server -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>reserve-server-port</id>
-                        <goals>
-                            <goal>reserve-network-port</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <portNames>
-                                <portName>http.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>${basedir}</directory>
-                            <includes>
-                                <!-- sling folder is the workdir of the executable jar that we test -->
-                                <include>sling/**</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>integration-test</id>
                         <goals>
                             <goal>integration-test</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>verify</id>
-                        <goals>
                             <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <systemPropertyVariables>
-                        <!--  these are the minimal options required for the jar executor, see bundle-with-it module for more -->
-                        <keepJarRunning>${keepJarRunning}</keepJarRunning>
-                        <jar.executor.jar.options>${jar.executor.jar.options}</jar.executor.jar.options>
-                        <jar.executor.vm.options>${jar.executor.vm.options}</jar.executor.vm.options>
-                        <jar.executor.server.port>${http.port}</jar.executor.server.port>
-                        <additional.bundles.path>${project.build.directory}</additional.bundles.path>
-                        <server.ready.path.1>/:script src="system/sling.js"</server.ready.path.1>
-                        <server.ready.path.2>/.explorer.html:href="/libs/sling/explorer/css/explorer.css"</server.ready.path.2>
-                        <server.ready.path.3>/sling-test/sling/sling-test.html:Sling client library tests</server.ready.path.3>
-                        
-                        <!-- Additional bundles to install for testing -->
-                        <sling.additional.bundle.1>org.apache.sling.junit.core</sling.additional.bundle.1>
-                        <sling.additional.bundle.2>${project.artifactId}-${project.version}.jar</sling.additional.bundle.2>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <systemPropertyVariables combine.children="append">
+                        <bundle.filename>${basedir}/target/${project.build.finalName}.jar</bundle.filename>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-runnable-jar</id>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <includeArtifactIds>org.apache.sling.launchpad</includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- 
-                            Consider all dependencies as candidates to be installed
-                            as additional bundles. We use system properties to define
-                            which bundles to install in which order.  
-                        -->
-                        <id>copy-additional-bundles</id>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}</outputDirectory>
-                            <excludeTransitive>true</excludeTransitive>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.servicemix.tooling</groupId>
+                <artifactId>depends-maven-plugin</artifactId>
             </plugin>
          </plugins>
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.annotation.versioning</artifactId>
@@ -195,21 +84,6 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.component.annotations</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
@@ -224,11 +98,81 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.paxexam</artifactId>
+            <scope>test</scope>
+            <version>4.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam</artifactId>
+            <scope>test</scope>
+            <version>${org.ops4j.pax.exam.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-cm</artifactId>
+            <scope>test</scope>
+            <version>${org.ops4j.pax.exam.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-forked</artifactId>
+            <scope>test</scope>
+            <version>${org.ops4j.pax.exam.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-junit4</artifactId>
+            <scope>test</scope>
+            <version>${org.ops4j.pax.exam.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-link-mvn</artifactId>
+            <scope>test</scope>
+            <version>${org.ops4j.pax.exam.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>test</scope>
+            <version>7.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>4.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.resourceresolver-mock</artifactId>
@@ -241,39 +185,10 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.junit.core</artifactId>
-            <version>1.0.18</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.tools</artifactId>
-            <version>1.0.14</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.junit.teleporter</artifactId>
-            <version>1.0.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.21.0</version>
+            <version>4.5.1</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.launchpad</artifactId>
-            <version>8</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

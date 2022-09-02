@@ -18,93 +18,106 @@
  */
 package org.apache.sling.resourcebuilder.it;
 
-import static org.junit.Assert.fail;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.PersistenceException;
+import org.apache.sling.resourcebuilder.impl.MapArgsConverter;
+import org.apache.sling.resourcebuilder.test.ResourceAssertions;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.Configuration;
+import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.ProbeBuilder;
+import org.ops4j.pax.exam.TestProbeBuilder;
+import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerClass;
+import org.osgi.framework.Constants;
 
 import java.io.IOException;
 import java.util.Comparator;
 
-import org.apache.sling.api.resource.LoginException;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.junit.rules.TeleporterRule;
-import org.apache.sling.resourcebuilder.test.ResourceAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.junit.Assert.fail;
+import static org.ops4j.pax.exam.CoreOptions.options;
 
 /** Server-side integration test for the 
  *  ResourceBuilder, acquired via the ResourceBuilderProvider
  */
-@SuppressWarnings("null")
-public class ResourceBuilderIT {
-    
-    @Rule
-    public final TeleporterRule teleporter = 
-        TeleporterRule
-        .forClass(getClass(), "RBIT_Teleporter")
-        .withResources("/files/");
-    
-    private TestEnvironment E;
-    private ResourceAssertions A;
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerClass.class)
+public class ResourceBuilderIT extends ResourceBuilderTestSupport {
+
+    private ResourceAssertions resourceAssertions;
 
     @Before
     public void setup() throws LoginException, PersistenceException {
-        E = new TestEnvironment(teleporter);
-        A = new ResourceAssertions(E.parent.getPath(), E.resolver);
+        initializeTestResources();
+        resourceAssertions = new ResourceAssertions(parent.getPath(), resolver());
     }
     
     @After
-    public void cleanup() throws PersistenceException {
-        E.cleanup();
+    public void cleanup() throws PersistenceException, LoginException {
+        cleanupTestResources();
     }
-    
+
+    @Configuration
+    public Option[] configuration() {
+        return options(
+                baseConfiguration()
+        );
+    }
+
+    @ProbeBuilder
+    public TestProbeBuilder probeConfiguration(final TestProbeBuilder probeBuilder) {
+        probeBuilder.setHeader(Constants.EXPORT_PACKAGE, MapArgsConverter.class.getPackage().getName());
+
+        return probeBuilder;
+    }
     
     @Test
     public void simpleResource() {
-        E.builder
-            .resource("foo", "title", E.testRootPath)
-            .commit();
-        A.assertProperties("foo", "title", E.testRootPath);
+        builder.resource("foo", "title", testRootPath).commit();
+
+        resourceAssertions.assertProperties("foo", "title", testRootPath);
     }
     
     @Test
     public void smallTreeWithFile() throws IOException {
-        E.builder
+        builder
             .resource("somefolder")
             .file("the-model.js", getClass().getResourceAsStream("/files/models.js"), "foo", 42L)
             .commit();
-        
-        A.assertFile("somefolder/the-model.js", "foo", "yes, it worked", 42L);
+
+        resourceAssertions.assertFile("somefolder/the-model.js", "foo", "yes, it worked", 42L);
     }
     
     @Test
     public void fileAutoValues() throws IOException {
         final long startTime = System.currentTimeMillis();
-        E.builder
+        builder
             .resource("a/b/c")
             .file("model2.js", getClass().getResourceAsStream("/files/models.js"))
             .commit();
         
-        final Comparator<Long> moreThanStartTime = new Comparator<Long>() {
-            @Override
-            public int compare(Long expected, Long fromResource) {
-                if(fromResource >= startTime) {
-                    return 0;
-                }
-                fail("last-modified is not >= than current time:" + fromResource + " < " + startTime);
-                return -1;
+        final Comparator<Long> moreThanStartTime = (expected, fromResource) -> {
+            if(fromResource >= startTime) {
+                return 0;
             }
+            fail("last-modified is not >= than current time:" + fromResource + " < " + startTime);
+            return -1;
         };
-        
-        A.assertFile("a/b/c/model2.js", "application/javascript", "yes, it worked", startTime, moreThanStartTime);
+
+        resourceAssertions.assertFile("a/b/c/model2.js", "application/javascript", "yes, it worked", startTime, moreThanStartTime);
     }
     
     @Test
-    public void usingResolver() throws IOException {
-        E.builderService.forResolver(E.resolver).resource("foo/a/b").commit();
-        E.builderService.forResolver(E.resolver).resource("foo/c/d").commit();
-        A.assertResource("/foo/a/b");
-        A.assertResource("/foo/c/d");
+    public void usingResolver() throws LoginException {
+        builderService.forResolver(resolver()).resource("foo/a/b").commit();
+        builderService.forResolver(resolver()).resource("foo/c/d").commit();
+
+        resourceAssertions.assertResource("/foo/a/b");
+        resourceAssertions.assertResource("/foo/c/d");
     }
     
 }
