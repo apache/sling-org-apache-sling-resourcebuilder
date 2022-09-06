@@ -20,7 +20,6 @@ package org.apache.sling.resourcebuilder.it;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.resourcebuilder.impl.MapArgsConverter;
 import org.apache.sling.resourcebuilder.test.ResourceAssertions;
 import org.junit.After;
 import org.junit.Before;
@@ -28,12 +27,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
-import org.osgi.framework.Constants;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -68,13 +64,6 @@ public class ResourceBuilderIT extends ResourceBuilderTestSupport {
         );
     }
 
-    @ProbeBuilder
-    public TestProbeBuilder probeConfiguration(final TestProbeBuilder probeBuilder) {
-        probeBuilder.setHeader(Constants.EXPORT_PACKAGE, MapArgsConverter.class.getPackage().getName());
-
-        return probeBuilder;
-    }
-    
     @Test
     public void simpleResource() {
         builder.resource("foo", "title", testRootPath).commit();

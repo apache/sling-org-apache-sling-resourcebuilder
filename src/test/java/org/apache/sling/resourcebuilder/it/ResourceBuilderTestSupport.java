@@ -17,10 +17,6 @@
  * under the License.
  */
 package org.apache.sling.resourcebuilder.it;
-import org.apache.sling.resourcebuilder.impl.MapArgsConverter;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
-import org.osgi.framework.BundleContext;
 
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -34,19 +30,14 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.ModifiableCompositeOption;
 import org.ops4j.pax.exam.options.OptionalCompositeOption;
 import org.ops4j.pax.exam.options.extra.VMOption;
-import org.osgi.framework.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.sling.testing.paxexam.SlingOptions.awaitility;
 import static org.apache.sling.testing.paxexam.SlingOptions.logback;
 import static org.apache.sling.testing.paxexam.SlingOptions.slingQuickstartOakTar;
-import static org.awaitility.Awaitility.await;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 import static org.ops4j.pax.exam.CoreOptions.junitBundles;
 import static org.ops4j.pax.exam.CoreOptions.vmOption;
@@ -54,11 +45,6 @@ import static org.ops4j.pax.exam.CoreOptions.when;
 import static org.ops4j.pax.exam.cm.ConfigurationAdminOptions.newConfiguration;
 
 public class ResourceBuilderTestSupport extends TestSupport {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceBuilderTestSupport.class);
-
-    @Inject
-    private BundleContext bundleContext;
 
     @Inject
     protected ResourceResolverFactory resourceResolverFactory;
