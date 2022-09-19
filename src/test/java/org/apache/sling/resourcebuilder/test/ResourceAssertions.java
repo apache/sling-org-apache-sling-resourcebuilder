@@ -60,14 +60,11 @@ public class ResourceAssertions {
     
     /** Assert that a file exists and verify its properties. */
     public Resource assertFile(String path, String mimeType, String expectedContent, Long lastModified) throws IOException {
-        final Comparator<Long> defaultComparator = new Comparator<Long>() {
-            @Override
-            public int compare(Long expected, Long fromResource) {
-                if(expected == -1) {
-                    return 0;
-                }
-                return expected.compareTo(fromResource);
+        final Comparator<Long> defaultComparator = (expected, fromResource) -> {
+            if(expected == -1) {
+                return 0;
             }
+            return expected.compareTo(fromResource);
         };
         return assertFile(path, mimeType, expectedContent, lastModified, defaultComparator);
     }
