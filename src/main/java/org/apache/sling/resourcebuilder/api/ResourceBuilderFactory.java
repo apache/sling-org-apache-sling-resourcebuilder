@@ -28,16 +28,17 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface ResourceBuilderFactory {
-    
-    /** Start a ResourceBuilder using the supplied parent resource 
+
+    /** Start a ResourceBuilder using the supplied parent resource
      *  @return the new builder
      * */
-    @NotNull ResourceBuilder forParent(@NotNull Resource parent);
-    
+    @NotNull
+    ResourceBuilder forParent(@NotNull Resource parent);
+
     /** Start a ResourceBuilder using the supplied ResourceResolver,
-     *  starting with the root resource as the builder's parent resource. 
+     *  starting with the root resource as the builder's parent resource.
      *  @return the new builder
      * */
-    @NotNull ResourceBuilder forResolver(@NotNull ResourceResolver r);
-    
+    @NotNull
+    ResourceBuilder forResolver(@NotNull ResourceResolver r);
 }

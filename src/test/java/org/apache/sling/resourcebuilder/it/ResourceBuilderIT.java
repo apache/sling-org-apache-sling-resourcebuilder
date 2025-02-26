@@ -18,6 +18,9 @@
  */
 package org.apache.sling.resourcebuilder.it;
 
+import java.io.IOException;
+import java.util.Comparator;
+
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.resourcebuilder.test.ResourceAssertions;
@@ -31,13 +34,10 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.io.IOException;
-import java.util.Comparator;
-
 import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.options;
 
-/** Server-side integration test for the 
+/** Server-side integration test for the
  *  ResourceBuilder, acquired via the ResourceBuilderProvider
  */
 @RunWith(PaxExam.class)
@@ -51,7 +51,7 @@ public class ResourceBuilderIT extends ResourceBuilderTestSupport {
         initializeTestResources();
         resourceAssertions = new ResourceAssertions(parent.getPath(), resolver());
     }
-    
+
     @After
     public void cleanup() throws PersistenceException, LoginException {
         cleanupTestResources();
@@ -59,9 +59,7 @@ public class ResourceBuilderIT extends ResourceBuilderTestSupport {
 
     @Configuration
     public Option[] configuration() {
-        return options(
-                baseConfiguration()
-        );
+        return options(baseConfiguration());
     }
 
     @Test
@@ -70,36 +68,35 @@ public class ResourceBuilderIT extends ResourceBuilderTestSupport {
 
         resourceAssertions.assertProperties("foo", "title", testRootPath);
     }
-    
+
     @Test
     public void smallTreeWithFile() throws IOException {
-        builder
-            .resource("somefolder")
-            .file("the-model.js", getClass().getResourceAsStream("/files/models.js"), "foo", 42L)
-            .commit();
+        builder.resource("somefolder")
+                .file("the-model.js", getClass().getResourceAsStream("/files/models.js"), "foo", 42L)
+                .commit();
 
         resourceAssertions.assertFile("somefolder/the-model.js", "foo", "yes, it worked", 42L);
     }
-    
+
     @Test
     public void fileAutoValues() throws IOException {
         final long startTime = System.currentTimeMillis();
-        builder
-            .resource("a/b/c")
-            .file("model2.js", getClass().getResourceAsStream("/files/models.js"))
-            .commit();
-        
+        builder.resource("a/b/c")
+                .file("model2.js", getClass().getResourceAsStream("/files/models.js"))
+                .commit();
+
         final Comparator<Long> moreThanStartTime = (expected, fromResource) -> {
-            if(fromResource >= startTime) {
+            if (fromResource >= startTime) {
                 return 0;
             }
             fail("last-modified is not >= than current time:" + fromResource + " < " + startTime);
             return -1;
         };
 
-        resourceAssertions.assertFile("a/b/c/model2.js", "application/javascript", "yes, it worked", startTime, moreThanStartTime);
+        resourceAssertions.assertFile(
+                "a/b/c/model2.js", "application/javascript", "yes, it worked", startTime, moreThanStartTime);
     }
-    
+
     @Test
     public void usingResolver() throws LoginException {
         builderService.forResolver(resolver()).resource("foo/a/b").commit();
@@ -108,5 +105,4 @@ public class ResourceBuilderIT extends ResourceBuilderTestSupport {
         resourceAssertions.assertResource("/foo/a/b");
         resourceAssertions.assertResource("/foo/c/d");
     }
-    
 }

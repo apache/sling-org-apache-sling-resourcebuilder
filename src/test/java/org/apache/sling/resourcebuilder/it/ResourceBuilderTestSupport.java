@@ -18,6 +18,11 @@
  */
 package org.apache.sling.resourcebuilder.it;
 
+import javax.inject.Inject;
+
+import java.util.Objects;
+import java.util.UUID;
+
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -30,10 +35,6 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.ModifiableCompositeOption;
 import org.ops4j.pax.exam.options.OptionalCompositeOption;
 import org.ops4j.pax.exam.options.extra.VMOption;
-
-import javax.inject.Inject;
-import java.util.Objects;
-import java.util.UUID;
 
 import static org.apache.sling.testing.paxexam.SlingOptions.awaitility;
 import static org.apache.sling.testing.paxexam.SlingOptions.logback;
@@ -58,20 +59,18 @@ public class ResourceBuilderTestSupport extends TestSupport {
 
     public ModifiableCompositeOption baseConfiguration() {
         return composite(
-            super.baseConfiguration(),
-            slingQuickstart(),
-            //Sling ResourceBuilder
-            testBundle("bundle.filename"),
-            logback(),
-            awaitility(),
-            junitBundles(),
-            newConfiguration("org.apache.sling.jcr.base.internal.LoginAdminWhitelist")
-                    .put("whitelist.bundles.regexp", "PAXEXAM-PROBE-.*")
-                    .asOption(),
-
-            optionalRemoteDebug(),
-            jacoco()
-        );
+                super.baseConfiguration(),
+                slingQuickstart(),
+                // Sling ResourceBuilder
+                testBundle("bundle.filename"),
+                logback(),
+                awaitility(),
+                junitBundles(),
+                newConfiguration("org.apache.sling.jcr.base.internal.LoginAdminWhitelist")
+                        .put("whitelist.bundles.regexp", "PAXEXAM-PROBE-.*")
+                        .asOption(),
+                optionalRemoteDebug(),
+                jacoco());
     }
 
     protected Option slingQuickstart() {
@@ -96,7 +95,8 @@ public class ResourceBuilderTestSupport extends TestSupport {
     // remove with Testing PaxExam 4.0
     protected OptionalCompositeOption jacoco() {
         final String jacocoCommand = System.getProperty("jacoco.command");
-        final VMOption option = Objects.nonNull(jacocoCommand) && !jacocoCommand.trim().isEmpty() ? vmOption(jacocoCommand) : null;
+        final VMOption option =
+                Objects.nonNull(jacocoCommand) && !jacocoCommand.trim().isEmpty() ? vmOption(jacocoCommand) : null;
         return when(Objects.nonNull(option)).useOptions(option);
     }
 
@@ -113,7 +113,7 @@ public class ResourceBuilderTestSupport extends TestSupport {
     }
 
     void cleanupTestResources() throws PersistenceException, LoginException {
-        if(resolver() != null && parent != null) {
+        if (resolver() != null && parent != null) {
             resolver().delete(parent);
             resolver().commit();
         }

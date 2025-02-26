@@ -18,16 +18,16 @@
  */
 package org.apache.sling.resourcebuilder.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Map;
 
 import org.apache.sling.api.resource.PersistenceException;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class MapArgsConverterTest {
-    
+
     @Test
     public void validArguments() throws PersistenceException {
         final Map<String, Object> m = MapArgsConverter.toMap("foo", "bar", "count", 21);
@@ -35,14 +35,14 @@ public class MapArgsConverterTest {
         assertEquals("bar", m.get("foo"));
         assertEquals(21, m.get("count"));
     }
-    
+
     @Test
     public void noArguments() throws PersistenceException {
         final Map<String, Object> m = MapArgsConverter.toMap();
         assertTrue(m.isEmpty());
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void barArguments() throws PersistenceException {
         MapArgsConverter.toMap("foo", "bar", "count");
     }

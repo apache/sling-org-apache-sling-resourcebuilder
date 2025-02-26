@@ -29,18 +29,17 @@ import org.jetbrains.annotations.NotNull;
  *  to simplify our builder's syntax.
  */
 public class MapArgsConverter {
-    
+
     /** Convert an args list to a Map */
     @SuppressWarnings("null")
     public static @NotNull Map<String, Object> toMap(@NotNull Object @NotNull ... args) {
-        if(args.length % 2 != 0) {
+        if (args.length % 2 != 0) {
             throw new IllegalArgumentException("args must be an even number of name/values:" + Arrays.asList(args));
         }
         final Map<String, Object> result = new HashMap<String, Object>();
-        for(int i=0 ; i < args.length; i+=2) {
-            result.put(args[i].toString(), args[i+1]);
+        for (int i = 0; i < args.length; i += 2) {
+            result.put(args[i].toString(), args[i + 1]);
         }
         return Collections.unmodifiableMap(result);
     }
-
 }

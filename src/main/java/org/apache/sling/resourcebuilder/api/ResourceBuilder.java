@@ -29,29 +29,31 @@ import org.osgi.annotation.versioning.ProviderType;
 /** Builds Sling Resources using a simple fluent API */
 @ProviderType
 public interface ResourceBuilder {
-    
+
     /** Default primary type for resources created by this builder */
     public static final String DEFAULT_PRIMARY_TYPE = "nt:unstructured";
-    
-    /** Create a Resource, which optionally becomes the current 
-     *  parent Resource. 
-     * @param path The path of the Resource to create.
-     *    If it's a relative path this builder's current resource is used as parent.
-     *    Otherwise the resource is created ad the given absolute path.
-     * @param properties optional name-value pairs 
-     * @return this builder
-     */
-    @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Object @NotNull ... properties);
 
-    /** Create a Resource, which optionally becomes the current 
-     *  parent Resource. 
+    /** Create a Resource, which optionally becomes the current
+     *  parent Resource.
      * @param path The path of the Resource to create.
      *    If it's a relative path this builder's current resource is used as parent.
      *    Otherwise the resource is created ad the given absolute path.
-     * @param properties Name-value pairs 
+     * @param properties optional name-value pairs
      * @return this builder
      */
-    @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Map<String, Object> properties);
+    @NotNull
+    ResourceBuilder resource(@NotNull String path, @NotNull Object @NotNull ... properties);
+
+    /** Create a Resource, which optionally becomes the current
+     *  parent Resource.
+     * @param path The path of the Resource to create.
+     *    If it's a relative path this builder's current resource is used as parent.
+     *    Otherwise the resource is created ad the given absolute path.
+     * @param properties Name-value pairs
+     * @return this builder
+     */
+    @NotNull
+    ResourceBuilder resource(@NotNull String path, @NotNull Map<String, Object> properties);
 
     /** Create a file under the current parent resource
      * @param filename The name of the created file
@@ -60,45 +62,53 @@ public interface ResourceBuilder {
      * @param lastModified if &lt; 0, current time is used
      * @return this builder
      */
-    @NotNull ResourceBuilder file(@NotNull String filename, @NotNull InputStream data, @Nullable String mimeType, long lastModified);
-    
-    /** Create a file under the current parent resource. Mime type is set using the 
+    @NotNull
+    ResourceBuilder file(
+            @NotNull String filename, @NotNull InputStream data, @Nullable String mimeType, long lastModified);
+
+    /** Create a file under the current parent resource. Mime type is set using the
      *  Sling MimeTypeService, and last modified is set to current time.
      * @param filename The name of the created file
      * @param data The file data
      * @return this builder
      */
-    @NotNull ResourceBuilder file(@NotNull String filename, @NotNull InputStream data);
-    
+    @NotNull
+    ResourceBuilder file(@NotNull String filename, @NotNull InputStream data);
+
     /** Commit created resources */
-    @NotNull ResourceBuilder commit();
-    
+    @NotNull
+    ResourceBuilder commit();
+
     /** Set the primary type for intermediate resources created
      *  when the parent of resource being created does not exist.
      * @param primaryType If null the DEFAULT_PRIMARY_TYPE is used.
      * @return this builder
      */
-    @NotNull ResourceBuilder withIntermediatePrimaryType(@Nullable String primaryType);
-    
-    /** Set siblings mode (as opposed to hierarchy mode) where creating a resource 
+    @NotNull
+    ResourceBuilder withIntermediatePrimaryType(@Nullable String primaryType);
+
+    /** Set siblings mode (as opposed to hierarchy mode) where creating a resource
      *  doesn't change the current parent. Used to create flat structures.
      *  This is off by default.
      * @return this builder
      */
-    @NotNull ResourceBuilder siblingsMode();
-    
-    /** Set hierarchy mode (as opposed to siblings mode) where creating a resource 
+    @NotNull
+    ResourceBuilder siblingsMode();
+
+    /** Set hierarchy mode (as opposed to siblings mode) where creating a resource
      *  sets it as the current parent. Used to create tree structures.
      *  This is on by default.
      * @return this builder
      */
-    @NotNull ResourceBuilder hierarchyMode();
-    
-    /** Return the current parent resource */
-    @NotNull Resource getCurrentParent();
-    
-    /** Reset the current parent Resource to the original one.
-     *  Also activates hierarchyMode which is the default mode. */ 
-    @NotNull ResourceBuilder atParent();
+    @NotNull
+    ResourceBuilder hierarchyMode();
 
+    /** Return the current parent resource */
+    @NotNull
+    Resource getCurrentParent();
+
+    /** Reset the current parent Resource to the original one.
+     *  Also activates hierarchyMode which is the default mode. */
+    @NotNull
+    ResourceBuilder atParent();
 }

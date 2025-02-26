@@ -41,7 +41,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     private @NotNull Resource currentParent;
     private String intermediatePrimaryType;
     private boolean hierarchyMode;
-    
+
     public static final String JCR_PRIMARYTYPE = "jcr:primaryType";
     public static final String JCR_MIMETYPE = "jcr:mimeType";
     public static final String JCR_LASTMODIFIED = "jcr:lastModified";
@@ -49,13 +49,13 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     public static final String JCR_CONTENT = "jcr:content";
     public static final String NT_RESOURCE = "nt:resource";
     public static final String NT_FILE = "nt:file";
-    
+
     public static final String CANNOT_RESTART =
             "Cannot reset the parent resource or resource resolver, please create a new "
-            + "builder using the ResourceBuilder service";
-    
+                    + "builder using the ResourceBuilder service";
+
     private final @NotNull MimeTypeService mimeTypeService;
-    
+
     public ResourceBuilderImpl(@NotNull Resource parent, @NotNull MimeTypeService mts) {
         mimeTypeService = mts;
         if (parent == null) {
@@ -67,16 +67,16 @@ public class ResourceBuilderImpl implements ResourceBuilder {
         currentParent = parent;
         hierarchyMode = true;
     }
-    
-    private @NotNull ResourceBuilderImpl cloneResourceBuilder(@NotNull Resource newCurrentParent,
-            @Nullable String newIntermediatePrimaryType, boolean newHierarchyMode) {
+
+    private @NotNull ResourceBuilderImpl cloneResourceBuilder(
+            @NotNull Resource newCurrentParent, @Nullable String newIntermediatePrimaryType, boolean newHierarchyMode) {
         ResourceBuilderImpl clone = new ResourceBuilderImpl(originalParent, mimeTypeService);
         clone.currentParent = newCurrentParent;
         clone.intermediatePrimaryType = newIntermediatePrimaryType;
         clone.hierarchyMode = newHierarchyMode;
         return clone;
     }
-    
+
     @Override
     public @NotNull Resource getCurrentParent() {
         return currentParent;
@@ -86,67 +86,61 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     public @NotNull ResourceBuilder atParent() {
         return cloneResourceBuilder(originalParent, this.intermediatePrimaryType, true);
     }
-    
+
     private boolean isAbsolutePath(String path) {
         return path.startsWith("/") && !path.contains("..");
     }
 
     private void checkRelativePath(String path) {
-        if(path.startsWith("/")) {
+        if (path.startsWith("/")) {
             throw new IllegalArgumentException("Path is not relative:" + path);
         }
-        if(path.contains("..")) {
+        if (path.contains("..")) {
             throw new IllegalArgumentException("Path contains invalid pattern '..': " + path);
         }
     }
 
     private String parentPath(String relativePath) {
         final String parentPath = currentParent.getPath();
-        final String fullPath = 
-            parentPath.endsWith("/")  ? 
-            parentPath + relativePath : 
-            parentPath + "/" + relativePath;
+        final String fullPath = parentPath.endsWith("/") ? parentPath + relativePath : parentPath + "/" + relativePath;
         return ResourceUtil.getParent(fullPath);
     }
-    
+
     @Override
-    public @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Map<String,Object> properties) {
+    public @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Map<String, Object> properties) {
         Resource r = null;
-        
+
         final String parentPath;
         final String fullPath;
         boolean absolutePath = isAbsolutePath(path);
         if (absolutePath) {
             parentPath = ResourceUtil.getParent(path);
             fullPath = path;
-        }
-        else {
+        } else {
             checkRelativePath(path);
             parentPath = parentPath(path);
             fullPath = currentParent.getPath() + "/" + path;
         }
         final Resource myParent = ensureResourceExists(parentPath);
-        
+
         try {
             r = currentParent.getResourceResolver().getResource(fullPath);
             if (r == null) {
-                r = currentParent.getResourceResolver().create(myParent, 
-                        ResourceUtil.getName(fullPath), properties);
+                r = currentParent.getResourceResolver().create(myParent, ResourceUtil.getName(fullPath), properties);
             } else {
                 // Resource exists, set our properties
                 final ModifiableValueMap mvm = r.adaptTo(ModifiableValueMap.class);
                 if (mvm == null) {
                     throw new IllegalStateException("Cannot modify properties of " + r.getPath());
                 }
-                for(Map.Entry <String, Object> e : properties.entrySet()) {
+                for (Map.Entry<String, Object> e : properties.entrySet()) {
                     mvm.put(e.getKey(), e.getValue());
                 }
             }
-        } catch(PersistenceException pex) {
-            throw new RuntimeException(
-                    "PersistenceException while creating Resource " + fullPath, pex);
+        } catch (PersistenceException pex) {
+            throw new RuntimeException("PersistenceException while creating Resource " + fullPath, pex);
         }
-        
+
         if (r == null) {
             throw new RuntimeException("Failed to get or create resource " + fullPath);
         } else if (hierarchyMode || absolutePath) {
@@ -154,21 +148,19 @@ public class ResourceBuilderImpl implements ResourceBuilder {
         }
         return this;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ResourceBuilder resource(@NotNull String path, @NotNull Object @NotNull ... properties) {
         if (properties == null || properties.length == 0) {
             return resource(path, ValueMap.EMPTY);
-        }
-        else if (properties.length == 1 && properties[0] instanceof Map) {
-            return resource(path, (Map<String,Object>)properties[0]);
-        }
-        else {
+        } else if (properties.length == 1 && properties[0] instanceof Map) {
+            return resource(path, (Map<String, Object>) properties[0]);
+        } else {
             return resource(path, MapArgsConverter.toMap(properties));
         }
     }
-    
+
     /** Create a Resource at the specified path if none exists yet,
      *  using the current intermediate primary type. "Stolen" from
      *  the sling-mock module's ContentBuilder class.
@@ -176,7 +168,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
      *  @return Resource at path (existing or newly created)
      */
     protected final Resource ensureResourceExists(String path) {
-        if(path == null || path.length() == 0 || path.equals("/")) {
+        if (path == null || path.length() == 0 || path.equals("/")) {
             return resourceResolver.getResource("/");
         }
         Resource resource = resourceResolver.getResource(path);
@@ -188,65 +180,65 @@ public class ResourceBuilderImpl implements ResourceBuilder {
         Resource parentResource = ensureResourceExists(parentPath);
         try {
             resource = resourceResolver.create(
-                    parentResource, 
-                    name, 
-                    MapArgsConverter.toMap(JCR_PRIMARYTYPE, intermediatePrimaryType));
+                    parentResource, name, MapArgsConverter.toMap(JCR_PRIMARYTYPE, intermediatePrimaryType));
             return resource;
         } catch (PersistenceException ex) {
             throw new RuntimeException("Unable to create intermediate resource at " + path, ex);
         }
     }
-    
+
     protected String getMimeType(String filename, String userSuppliedMimeType) {
-        if(userSuppliedMimeType != null) {
+        if (userSuppliedMimeType != null) {
             return userSuppliedMimeType;
         }
         return mimeTypeService.getMimeType(filename);
     }
-    
+
     protected long getLastModified(long userSuppliedValue) {
-        if(userSuppliedValue < 0) {
+        if (userSuppliedValue < 0) {
             return System.currentTimeMillis();
         }
         return userSuppliedValue;
     }
-    
+
     @Override
-    public @NotNull ResourceBuilder file(@NotNull String relativePath, @NotNull InputStream data, @Nullable String mimeType, long lastModified) {
+    public @NotNull ResourceBuilder file(
+            @NotNull String relativePath, @NotNull InputStream data, @Nullable String mimeType, long lastModified) {
         checkRelativePath(relativePath);
         final String name = ResourceUtil.getName(relativePath);
-        if(data == null) {
+        if (data == null) {
             throw new IllegalArgumentException("Data is null for file " + name);
         }
-        
+
         Resource file = null;
         final ResourceResolver resolver = currentParent.getResourceResolver();
         final String parentPath = parentPath(relativePath);
-        
+
         final Resource parent = ensureResourceExists(parentPath);
         try {
             final String fullPath = currentParent.getPath() + "/" + name;
-            if(resolver.getResource(fullPath) != null) {
+            if (resolver.getResource(fullPath) != null) {
                 throw new IllegalStateException("Resource already exists:" + fullPath);
             }
             final Map<String, Object> fileProps = new HashMap<String, Object>();
             fileProps.put(JCR_PRIMARYTYPE, NT_FILE);
             file = resolver.create(parent, name, fileProps);
-            
+
             final Map<String, Object> contentProps = new HashMap<String, Object>();
             contentProps.put(JCR_PRIMARYTYPE, NT_RESOURCE);
             contentProps.put(JCR_MIMETYPE, getMimeType(name, mimeType));
             contentProps.put(JCR_LASTMODIFIED, getLastModified(lastModified));
             contentProps.put(JCR_DATA, data);
-            resolver.create(file, JCR_CONTENT, contentProps); 
-        } catch(PersistenceException pex) {
+            resolver.create(file, JCR_CONTENT, contentProps);
+        } catch (PersistenceException pex) {
             throw new RuntimeException("Unable to create file under " + currentParent.getPath(), pex);
         }
-        
-        if(file == null) {
-            throw new RuntimeException("Unable to get or created file resource " + relativePath + " under " + currentParent.getPath());
+
+        if (file == null) {
+            throw new RuntimeException(
+                    "Unable to get or created file resource " + relativePath + " under " + currentParent.getPath());
         }
-        if(hierarchyMode) {
+        if (hierarchyMode) {
             return cloneResourceBuilder(file, this.intermediatePrimaryType, this.hierarchyMode);
         }
         return this;
@@ -272,7 +264,7 @@ public class ResourceBuilderImpl implements ResourceBuilder {
     public @NotNull ResourceBuilder hierarchyMode() {
         return cloneResourceBuilder(currentParent, intermediatePrimaryType, true);
     }
-    
+
     @Override
     public @NotNull ResourceBuilder commit() {
         try {
@@ -282,5 +274,4 @@ public class ResourceBuilderImpl implements ResourceBuilder {
         }
         return this;
     }
-
 }
