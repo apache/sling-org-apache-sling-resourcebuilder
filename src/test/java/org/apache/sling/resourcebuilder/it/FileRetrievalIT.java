@@ -18,6 +18,9 @@
  */
 package org.apache.sling.resourcebuilder.it;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -33,9 +36,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +43,7 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 
 /** Verify that our file structure is correct,
  *  by creating a file and retrieving it via
- *  a Sling request. 
+ *  a Sling request.
  */
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -56,7 +56,7 @@ public class FileRetrievalIT extends ResourceBuilderTestSupport {
         initializeTestResources();
         resourceAssertions = new ResourceAssertions(parent.getPath(), resolver());
     }
-    
+
     @After
     public void cleanup() throws PersistenceException, LoginException {
         cleanupTestResources();
@@ -64,24 +64,21 @@ public class FileRetrievalIT extends ResourceBuilderTestSupport {
 
     @Configuration
     public Option[] configuration() {
-        return options(
-                baseConfiguration()
-        );
+        return options(baseConfiguration());
     }
-    
+
     @Test
     public void createAndRetrieveFile() throws IOException {
         final String expected = "yes, it worked";
         final long startTime = System.currentTimeMillis();
         final String mimeType = "application/javascript";
-        
-        builder
-            .resource("somefolder")
-            .file("the-model.js", getClass().getResourceAsStream("/files/models.js"))
-            .commit();
-        
+
+        builder.resource("somefolder")
+                .file("the-model.js", getClass().getResourceAsStream("/files/models.js"))
+                .commit();
+
         final Resource r = resourceAssertions.assertFile("somefolder/the-model.js", mimeType, expected, -1L);
-        
+
         final ResourceMetadata meta = r.getResourceMetadata();
         assertTrue("Expecting a last modified time >= startTime", meta.getModificationTime() >= startTime);
         assertEquals("Expecting the correct mime-type", mimeType, meta.getContentType());

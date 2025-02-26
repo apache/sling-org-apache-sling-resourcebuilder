@@ -32,10 +32,10 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(service = ResourceBuilderFactory.class)
 public class ResourceBuilderFactoryService implements ResourceBuilderFactory {
-    
+
     @Reference
     private MimeTypeService mimeTypeService;
-    
+
     @SuppressWarnings("null")
     @Override
     public @NotNull ResourceBuilder forParent(@NotNull Resource parent) {
@@ -45,10 +45,9 @@ public class ResourceBuilderFactoryService implements ResourceBuilderFactory {
     @Override
     public @NotNull ResourceBuilder forResolver(@NotNull ResourceResolver r) {
         final Resource root = r.getResource("/");
-        if(root == null) {
+        if (root == null) {
             throw new IllegalStateException("Cannot read root resource");
         }
         return forParent(root);
     }
-
 }
